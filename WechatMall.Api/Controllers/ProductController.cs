@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Encodings.Web;
@@ -35,13 +37,30 @@ namespace WechatMall.Api.Controllers
             this.mapper = mapper;
         }
 
+        [AllowAnonymous]
         [HttpGet(Name = nameof(GetProducts))]
         public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts([FromQuery] ProductDtoParameter parameter)
         {
-            if (string.IsNullOrWhiteSpace(parameter.CategoryID)) return PagedList<ProductDto>.Empty;
-            var queryProduct = productRepository.GetQueryableProducts()
-                                                .Where(p => p.CategoryID.Equals(parameter.CategoryID) && p.OnSale && !p.IsDeleted)
-                                                .OrderBy(p => p.OrderbyId);
+            var queryProduct = productRepository.GetQueryableProducts().Where(p => p.OnSale && !p.IsDeleted);
+            if (!string.IsNullOrWhiteSpace(parameter.CategoryID))
+            {
+                queryProduct = queryProduct.Where(p => p.CategoryID.Equals(parameter.CategoryID));
+            }
+            switch (parameter.OrderBy)
+            {
+                case OrderType.None:
+                    queryProduct = queryProduct.OrderBy(p => p.OrderbyId);
+                    break;
+                case OrderType.Recommend:
+                    queryProduct = queryProduct.Where(p => p.Recommend > 0)
+                                               .OrderBy(p => p.Recommend);
+                    break;
+                case OrderType.TopSales:
+                    queryProduct = queryProduct.OrderByDescending(p => p.SoldCount);
+                    break;
+                default: throw new IndexOutOfRangeException();
+            }
+                                                
             var pagedProduct = await PagedList<Product>.Create(queryProduct, parameter.PageNumber, parameter.PageSize);
 
             var previousPageLink = pagedProduct.HasPrevious
@@ -70,19 +89,7 @@ namespace WechatMall.Api.Controllers
             return Ok(productDtos);
         }
 
-        [HttpGet("topSales")]
-        public async Task<ActionResult<ProductDto>> GetTopSaleProducts([FromQuery] int limit)
-        {
-            if (limit < 1) limit = 1;
-            var products = await productRepository.GetQueryableProducts()
-                                       .Where(p => p.OnSale && !p.IsDeleted)
-                                       .OrderByDescending(p => p.SoldCount)
-                                       .Take(limit).ToListAsync();
-            var productDtos = mapper.Map<IEnumerable<ProductDto>>(products);
-            return Ok(productDtos);
-
-        }
-
+        [AllowAnonymous]
         [HttpGet("{productID}", Name = nameof(GetProduct))]
         public async Task<ActionResult<ProductDetailDto>> GetProduct(string productID)
         {
@@ -100,6 +107,7 @@ namespace WechatMall.Api.Controllers
                     return Url.Link(nameof(GetProducts), new
                     {
                         CategoryID = parameters.CategoryID,
+                        OrderBy = parameters.OrderBy,
                         PageNumber = parameters.PageNumber - 1,
                         PageSize = parameters.PageSize
                     });
@@ -107,6 +115,7 @@ namespace WechatMall.Api.Controllers
                     return Url.Link(nameof(GetProducts), new
                     {
                         CategoryID = parameters.CategoryID,
+                        OrderBy = parameters.OrderBy,
                         PageNumber = parameters.PageNumber + 1,
                         PageSize = parameters.PageSize
                     });
@@ -114,6 +123,7 @@ namespace WechatMall.Api.Controllers
                     return Url.Link(nameof(GetProducts), new
                     {
                         CategoryID = parameters.CategoryID,
+                        OrderBy = parameters.OrderBy,
                         PageNumber = parameters.PageNumber,
                         PageSize = parameters.PageSize
                     });
@@ -125,6 +135,7 @@ namespace WechatMall.Api.Controllers
             NextPage
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<ProductDetailDto>> AddProduct(ProductAddDto product)
         {
@@ -149,6 +160,7 @@ namespace WechatMall.Api.Controllers
             dtoToReturn);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{productID}")]
         public async Task<IActionResult> UpdateProduct(string productID, ProductUpdateDto product)
         {
@@ -164,6 +176,7 @@ namespace WechatMall.Api.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{productID}")]
         public async Task<IActionResult> PartiallyUpdateProduct(string productID, JsonPatchDocument<ProductUpdateDto> patchDocument)
         {
@@ -185,6 +198,7 @@ namespace WechatMall.Api.Controllers
             return NoContent();
         }
 
+        //[Authorize(Roles = "Admin")]
         //[HttpDelete("{productID}")]
         //public async Task<IActionResult> DeleteProduct(string productID)
         //{

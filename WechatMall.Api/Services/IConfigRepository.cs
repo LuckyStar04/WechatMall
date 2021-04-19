@@ -4,7 +4,7 @@ using WechatMall.Api.Entities;
 
 namespace WechatMall.Api.Services
 {
-    public interface IIndexRepository
+    public interface IConfigRepository
     {
         Task<bool> ConfigExistsAsync(string key);
         Task<SiteConfig> GetConfig(string key);

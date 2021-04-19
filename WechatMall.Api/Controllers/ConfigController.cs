@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using WechatMall.Api.Entities;
 using WechatMall.Api.Services;
@@ -7,15 +8,16 @@ namespace WechatMall.Api.Controllers
 {
     [ApiController]
     [Route("/api/configs")]
-    public class IndexController : ControllerBase
+    public class ConfigController : ControllerBase
     {
-        private readonly IIndexRepository repository;
+        private readonly IConfigRepository repository;
 
-        public IndexController(IIndexRepository repository)
+        public ConfigController(IConfigRepository repository)
         {
             this.repository = repository;
         }
 
+        [AllowAnonymous]
         [HttpGet("{key}", Name = nameof(GetConfig))]
         public async Task<string> GetConfig(string key)
         {
@@ -28,6 +30,7 @@ namespace WechatMall.Api.Controllers
             return config.Value;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<string>> AddConfig(SiteConfig config)
         {
@@ -40,6 +43,7 @@ namespace WechatMall.Api.Controllers
             return CreatedAtRoute(nameof(GetConfig), new { config.Key }, config.Value);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{key}")]
         public async Task<IActionResult> UpdateConfig(string key, SiteConfig config)
         {
@@ -55,6 +59,7 @@ namespace WechatMall.Api.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{key}")]
         public async Task<IActionResult> DeleteConfig(string key)
         {

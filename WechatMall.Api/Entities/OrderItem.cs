@@ -7,11 +7,12 @@ namespace WechatMall.Api.Entities
     {
         [Key]
         public int Id { get; set; }
-        [Required, StringLength(10)]
+        [Required, StringLength(15)]
         public string OrderID { get; set; }
         public Order Order { get; set; }
         [Required, StringLength(10)]
         public string ProductID { get; set; }
+        public Product Product { get; set; }
         [Required]
         [Column(TypeName = "DECIMAL(18,4)")]
         public decimal Price { get; set; }

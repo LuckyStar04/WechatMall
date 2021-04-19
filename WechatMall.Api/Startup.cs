@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -6,10 +7,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
 using SixLabors.ImageSharp.Web.DependencyInjection;
 using System;
+using System.Text;
 using WechatMall.Api.Data;
 using WechatMall.Api.Services;
 
@@ -27,6 +30,19 @@ namespace WechatMall.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters()
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = Configuration["JWT:Issuer"],
+                        ValidateAudience = true,
+                        ValidAudience = Configuration["JWT:Audience"],
+                        ValidateLifetime = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JWT:SecretKey"]))
+                    };
+                });
             services.AddControllers(setup =>
             {
                 setup.ReturnHttpNotAcceptable = true;
@@ -56,14 +72,16 @@ namespace WechatMall.Api
             });
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Wechat Mall API", Version = "v1" });
             });
-
+            services.AddMemoryCache();
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
-            services.AddScoped<IIndexRepository, IndexRepository>();
+            services.AddScoped<IConfigRepository, ConfigRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddDbContext<MallDbContext>(option =>
             {
                 option.UseMySql(Configuration.GetConnectionString("DefaultConnection"));
@@ -85,6 +103,7 @@ namespace WechatMall.Api
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseImageSharp();

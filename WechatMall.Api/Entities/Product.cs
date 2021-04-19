@@ -30,10 +30,13 @@ namespace WechatMall.Api.Entities
         public ShippingFare ShippingFare { get; set; }
         public string Detail { get; set; }
         [Required, DefaultValue(0)]
+        public int Recommend { get; set; }
+        [Required, DefaultValue(0)]
         public int OrderbyId { get; set; }
         [Required, DefaultValue(true)]
         public bool OnSale { get; set; } = true;
         [Required, DefaultValue(false)]
         public bool IsDeleted { get; set; } = false;
+        public List<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
 }

@@ -1,18 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using WechatMall.Api.Data;
 using WechatMall.Api.Entities;
 
 namespace WechatMall.Api.Services
 {
-    public class IndexRepository : IIndexRepository
+    public class ConfigRepository : IConfigRepository
     {
         private readonly MallDbContext context;
 
-        public IndexRepository(MallDbContext context)
+        public ConfigRepository(MallDbContext context)
         {
             this.context = context;
         }

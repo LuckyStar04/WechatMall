@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -35,6 +36,7 @@ namespace WechatMall.Api.Controllers
             this.mapper = mapper;
         }
 
+        [AllowAnonymous]
         [HttpGet(Name = nameof(GetProductImages))]
         public async Task<ActionResult<IEnumerable<ProductImageDto>>> GetProductImages(string productID)
         {
@@ -44,6 +46,7 @@ namespace WechatMall.Api.Controllers
             return Ok(dtoToReturn);
         }
 
+        [AllowAnonymous]
         [HttpGet("{guid}", Name = nameof(GetProductImage))]
         public ActionResult<ProductImageDto> GetProductImage(Guid guid)
         {
@@ -73,6 +76,7 @@ namespace WechatMall.Api.Controllers
             });
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> AddProductImages(string productID, IFormFileCollection files)
         {
@@ -138,6 +142,7 @@ namespace WechatMall.Api.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{guid}")]
         public async Task<IActionResult> UpdateImage(Guid guid, IFormFile file)
         {
@@ -184,6 +189,7 @@ namespace WechatMall.Api.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{guid}")]
         public async Task<IActionResult> DeleteProductImage(Guid guid)
         {

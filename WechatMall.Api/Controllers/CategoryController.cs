@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -28,6 +29,7 @@ namespace WechatMall.Api.Controllers
             this.mapper = mapper;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CategoryDto>>> GetCategories([FromQuery] CategoryDtoParameter parameter)
         {
@@ -37,6 +39,7 @@ namespace WechatMall.Api.Controllers
             return Ok(categoryDtos);
         }
 
+        [AllowAnonymous]
         [HttpGet("{categoryID}", Name = nameof(GetCategory))]
         public async Task<ActionResult<CategoryDto>> GetCategory(string categoryID)
         {
@@ -49,6 +52,7 @@ namespace WechatMall.Api.Controllers
             return Ok(categoryDto);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<CategoryDto>> AddCategory(CategoryAddDto category)
         {
@@ -68,6 +72,7 @@ namespace WechatMall.Api.Controllers
             dtoToReturn);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{categoryID}")]
         public async Task<IActionResult> UpdateCategory(string categoryID, CategoryUpdateDto category)
         {
@@ -82,6 +87,7 @@ namespace WechatMall.Api.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{categoryID}")]
         public async Task<IActionResult> PartiallyUpdateCategory(string categoryID, JsonPatchDocument<CategoryUpdateDto> patchDocument)
         {
@@ -104,6 +110,7 @@ namespace WechatMall.Api.Controllers
             return NoContent();
         }
 
+        //[Authorize(Roles = "Admin")]
         //[HttpDelete("{categoryID}")]
         //public async Task<IActionResult> DeleteCategory(string categoryID)
         //{

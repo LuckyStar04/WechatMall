@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace WechatMall.Api.Entities
@@ -12,13 +11,13 @@ namespace WechatMall.Api.Entities
         public string CategoryID { get; set; }
         [Required, StringLength(10)]
         public string Name { get; set; }
-        [Required, DefaultValue(0)]
+        [Required]
         public int OrderbyId { get; set; }
         [Required, StringLength(255)]
         public string Icon { get; set; }
-        [Required, DefaultValue(true)]
+        [Required]
         public bool IsShown { get; set; } = true;
-        [Required, DefaultValue(false)]
+        [Required]
         public bool IsDeleted { get; set; } = false;
         public List<Product> Products { get; set; }
     }
