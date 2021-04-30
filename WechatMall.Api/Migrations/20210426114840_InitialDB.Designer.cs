@@ -9,7 +9,7 @@ using WechatMall.Api.Data;
 namespace WechatMall.Api.Migrations
 {
     [DbContext(typeof(MallDbContext))]
-    [Migration("20210419093450_InitialDB")]
+    [Migration("20210426114840_InitialDB")]
     partial class InitialDB
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -67,17 +67,31 @@ namespace WechatMall.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<int>("AllowLimit")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("DECIMAL(18,4)");
 
                     b.Property<decimal>("Condition")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("DECIMAL(18,4)");
+
+                    b.Property<int>("CouponCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CouponName")
+                        .IsRequired()
+                        .HasColumnType("varchar(40) CHARACTER SET utf8mb4")
+                        .HasMaxLength(40);
 
                     b.Property<int>("CouponType")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<string>("ProductIDs")
                         .IsRequired()
@@ -94,19 +108,19 @@ namespace WechatMall.Api.Migrations
 
             modelBuilder.Entity("WechatMall.Api.Entities.Coupon_User", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
                     b.Property<int>("CouponID")
                         .HasColumnType("int");
 
                     b.Property<Guid>("UserID")
                         .HasColumnType("char(36)");
 
-                    b.HasKey("Id");
+                    b.Property<int>("RecievedCount")
+                        .HasColumnType("int");
 
-                    b.HasIndex("CouponID");
+                    b.Property<int>("RemainedCount")
+                        .HasColumnType("int");
+
+                    b.HasKey("CouponID", "UserID");
 
                     b.HasIndex("UserID");
 

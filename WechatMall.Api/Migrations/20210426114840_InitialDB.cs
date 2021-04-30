@@ -47,12 +47,16 @@ namespace WechatMall.Api.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    CouponName = table.Column<string>(maxLength: 40, nullable: false),
                     ProductIDs = table.Column<string>(maxLength: 255, nullable: false),
                     CouponType = table.Column<int>(nullable: false),
-                    Condition = table.Column<decimal>(nullable: false),
-                    Amount = table.Column<decimal>(nullable: false),
+                    Condition = table.Column<decimal>(type: "DECIMAL(18,4)", nullable: false),
+                    Amount = table.Column<decimal>(type: "DECIMAL(18,4)", nullable: false),
                     StartTime = table.Column<DateTime>(nullable: false),
-                    EndTime = table.Column<DateTime>(nullable: false)
+                    EndTime = table.Column<DateTime>(nullable: false),
+                    AllowLimit = table.Column<int>(nullable: false),
+                    CouponCount = table.Column<int>(nullable: false),
+                    IsDeleted = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -141,14 +145,14 @@ namespace WechatMall.Api.Migrations
                 name: "Coupon_Users",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     UserID = table.Column<Guid>(nullable: false),
-                    CouponID = table.Column<int>(nullable: false)
+                    CouponID = table.Column<int>(nullable: false),
+                    RecievedCount = table.Column<int>(nullable: false),
+                    RemainedCount = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Coupon_Users", x => x.Id);
+                    table.PrimaryKey("PK_Coupon_Users", x => new { x.CouponID, x.UserID });
                     table.ForeignKey(
                         name: "FK_Coupon_Users_Coupons_CouponID",
                         column: x => x.CouponID,
@@ -287,11 +291,6 @@ namespace WechatMall.Api.Migrations
                 table: "Configs",
                 column: "Key",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Coupon_Users_CouponID",
-                table: "Coupon_Users",
-                column: "CouponID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Coupon_Users_UserID",

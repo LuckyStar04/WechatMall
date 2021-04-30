@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -21,7 +22,7 @@ using WechatMall.Api.Services;
 namespace WechatMall.Api.Controllers
 {
     [ApiController]
-    [Route("api/users/{userID}/orders")]
+    [Route("api/orders")]
     public class OrderController : ControllerBase
     {
         private readonly IOrderRepository orderRepository;
@@ -43,18 +44,93 @@ namespace WechatMall.Api.Controllers
 
         [Authorize(Roles = "Admin,User")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrders(Guid userID)
+        public async Task<ActionResult<IEnumerable<OrderDto>>> GetOrders([FromQuery] OrderDtoParameter parameter)
         {
-            var orders = await orderRepository.GetOrders(userID);
-            var orderDtos = mapper.Map<IEnumerable<OrderDto>>(orders);
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            if (role != "Admin")
+            {
+                parameter.UserID = new Guid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            }
+
+            var queryable = orderRepository.GetQueryableOrder()
+                                           .Include(o => o.OrderItems)
+                                           .Where(o => !o.IsDeleted);
+            if (parameter.UserID != null)
+            {
+                queryable = queryable.Where(o => o.UserID.Equals(parameter.UserID));
+            }
+            queryable = queryable.OrderByDescending(o => o.OrderTime);
+
+
+            var pagedOrders = await PagedList<Order>.Create(queryable, parameter.PageNumber, parameter.PageSize);
+
+            var previousPageLink = pagedOrders.HasPrevious
+                                 ? CreateProductsResourceUri(parameter, ResourceUriType.PreviousPage)
+                                 : null;
+
+            var nextPageLink = pagedOrders.HasNext
+                                 ? CreateProductsResourceUri(parameter, ResourceUriType.NextPage)
+                                 : null;
+
+            var paginationMetadata = new
+            {
+                totalCount = pagedOrders.TotalCount,
+                pageSize = pagedOrders.PageSize,
+                currentPage = pagedOrders.CurrentPage,
+                totalPages = pagedOrders.TotalPages,
+                previousPageLink,
+                nextPageLink
+            };
+            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata, new JsonSerializerOptions
+            {
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            }));
+
+            var orderDtos = mapper.Map<IEnumerable<OrderDto>>(pagedOrders);
 
             return Ok(orderDtos);
         }
 
-        [Authorize(Roles = "Admin,User")]
-        [HttpGet("{orderID}", Name = (nameof(GetOrder)))]
-        public async Task<ActionResult<OrderDetailDto>> GetOrder(Guid userID, string orderID)
+        private string CreateProductsResourceUri(OrderDtoParameter parameters, ResourceUriType type)
         {
+            switch (type)
+            {
+                case ResourceUriType.PreviousPage:
+                    return Url.Link(nameof(GetOrders), new
+                    {
+                        UserID = parameters.UserID,
+                        PageNumber = parameters.PageNumber - 1,
+                        PageSize = parameters.PageSize
+                    });
+                case ResourceUriType.NextPage:
+                    return Url.Link(nameof(GetOrders), new
+                    {
+                        UserID = parameters.UserID,
+                        PageNumber = parameters.PageNumber + 1,
+                        PageSize = parameters.PageSize
+                    });
+                default:
+                    return Url.Link(nameof(GetOrders), new
+                    {
+                        UserID = parameters.UserID,
+                        PageNumber = parameters.PageNumber,
+                        PageSize = parameters.PageSize
+                    });
+            }
+        }
+        public enum ResourceUriType
+        {
+            PreviousPage,
+            NextPage
+        }
+
+        [Authorize(Roles = "Admin,User")]
+        [HttpGet("{orderID:length(16)}", Name = (nameof(GetOrder)))]
+        public async Task<ActionResult<OrderDetailDto>> GetOrder(string orderID)
+        {
+            Guid userID = new Guid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
             var order = await orderRepository.GetOrderByID(orderID);
             if (order == null || !order.UserID.Equals(userID))
             {
@@ -67,8 +143,10 @@ namespace WechatMall.Api.Controllers
 
         [Authorize(Roles = "Admin,User")]
         [HttpPost]
-        public async Task<IActionResult> AddOrder(Guid userID, [FromBody] OrderAddDto order)
+        public async Task<IActionResult> AddOrder([FromBody] OrderAddDto order)
         {
+            Guid userID = new Guid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
             var user = userRepository.GetUserAsync(userID);
             if (user == null)
             {
@@ -114,7 +192,8 @@ namespace WechatMall.Api.Controllers
             };
             orderRepository.AddOrder(userID, orderEntity);
             await orderRepository.SaveAsync();
-            return CreatedAtRoute(nameof(GetOrder), new { userID, orderID });
+            var dtoToReturn = mapper.Map<OrderDetailDto>(orderEntity);
+            return CreatedAtRoute(nameof(GetOrder), new { userID, orderID }, dtoToReturn);
         }
 
         private decimal CalcCoupon()
@@ -128,9 +207,11 @@ namespace WechatMall.Api.Controllers
         }
 
         [Authorize(Roles = "Admin,User")]
-        [HttpPut("{orderID}")]
-        public async Task<IActionResult> UpdateOrder(Guid userID, string orderID, [FromBody] OrderUpdateDto order)
+        [HttpPut("{orderID:length(16)}")]
+        public async Task<IActionResult> UpdateOrder(string orderID, [FromBody] OrderUpdateDto order)
         {
+            Guid userID = new Guid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
             var orderEntity = await orderRepository.GetOrderByID(orderID);
             if (orderEntity == null || !orderEntity.UserID.Equals(userID))
             {
@@ -144,17 +225,21 @@ namespace WechatMall.Api.Controllers
         }
 
         [Authorize(Roles = "Admin,User")]
-        [HttpPatch("{orderID}")]
-        public async Task<IActionResult> PartiallyUpdateOrder(Guid userID, string orderID, [FromBody] OrderPatchDto order)
+        [HttpPatch("{orderID:length(16)}")]
+        public async Task<IActionResult> PartiallyUpdateOrder(string orderID, [FromBody] OrderPatchDto order)
         {
+            Guid userID = new Guid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
             throw new NotImplementedException();
 
         }
 
         [Authorize(Roles = "Admin,User")]
-        [HttpDelete("{orderID}")]
-        public async Task<IActionResult> RemoveOrder(Guid userID, string orderID)
+        [HttpDelete("{orderID:length(16)}")]
+        public async Task<IActionResult> RemoveOrder(string orderID)
         {
+            Guid userID = new Guid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
             var order = await orderRepository.GetOrderByID(orderID);
             if (order == null || !order.UserID.Equals(userID))
             {

@@ -20,7 +20,7 @@ using WechatMall.Api.Services;
 namespace WechatMall.Api.Controllers
 {
     [ApiController]
-    [Route("api/products/{productID}/images")]
+    [Route("api/products/{productID:length(10)}/images")]
     public class ProductImageController : ControllerBase
     {
         private readonly IProductRepository productRepository;
@@ -47,7 +47,7 @@ namespace WechatMall.Api.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("{guid}", Name = nameof(GetProductImage))]
+        [HttpGet("{guid:guid}", Name = nameof(GetProductImage))]
         public ActionResult<ProductImageDto> GetProductImage(Guid guid)
         {
             var image = productRepository.GetProductImage(guid);
@@ -143,7 +143,7 @@ namespace WechatMall.Api.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpPut("{guid}")]
+        [HttpPut("{guid:guid}")]
         public async Task<IActionResult> UpdateImage(Guid guid, IFormFile file)
         {
             var imageEntity = productRepository.GetProductImage(guid);
@@ -190,7 +190,7 @@ namespace WechatMall.Api.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpDelete("{guid}")]
+        [HttpDelete("{guid:guid}")]
         public async Task<IActionResult> DeleteProductImage(Guid guid)
         {
             var imageEntity = productRepository.GetProductImage(guid);

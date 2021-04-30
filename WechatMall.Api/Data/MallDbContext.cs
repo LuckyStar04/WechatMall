@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using WechatMall.Api.Entities;
 
 namespace WechatMall.Api.Data
@@ -97,6 +98,9 @@ namespace WechatMall.Api.Data
                 .OnDelete(DeleteBehavior.ClientSetNull);
 
             modelBuilder.Entity<Coupon_User>()
+                .HasKey(c => new { c.CouponID, c.UserID });
+
+            modelBuilder.Entity<Coupon_User>()
                 .HasOne(c => c.Coupon)
                 .WithMany(c => c.Users)
                 .HasForeignKey(c => c.CouponID)
@@ -123,7 +127,6 @@ namespace WechatMall.Api.Data
                 .Property(c => c.IsDeleted).HasDefaultValue(false);
             modelBuilder.Entity<ShippingFare>()
                 .Property(c => c.IsDeleted).HasDefaultValue(false);
-
         }
     }
 }

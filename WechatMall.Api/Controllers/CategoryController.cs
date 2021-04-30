@@ -40,7 +40,7 @@ namespace WechatMall.Api.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("{categoryID}", Name = nameof(GetCategory))]
+        [HttpGet("{categoryID:length(6)}", Name = nameof(GetCategory))]
         public async Task<ActionResult<CategoryDto>> GetCategory(string categoryID)
         {
             var category = await categoryRepository.GetCategoryAsync(categoryID);
@@ -73,7 +73,7 @@ namespace WechatMall.Api.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpPut("{categoryID}")]
+        [HttpPut("{categoryID:length(6)}")]
         public async Task<IActionResult> UpdateCategory(string categoryID, CategoryUpdateDto category)
         {
             var categoryEntity = await categoryRepository.GetCategoryAsync(categoryID);
@@ -88,7 +88,7 @@ namespace WechatMall.Api.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpPatch("{categoryID}")]
+        [HttpPatch("{categoryID:length(6)}")]
         public async Task<IActionResult> PartiallyUpdateCategory(string categoryID, JsonPatchDocument<CategoryUpdateDto> patchDocument)
         {
             var categoryEntity = await categoryRepository.GetCategoryAsync(categoryID);

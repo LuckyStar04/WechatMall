@@ -23,13 +23,14 @@ namespace WechatMall.Api.Helpers
 
             var signingCredentials = new SigningCredentials(secretKey, algorithm);
 
+            var now = DateTime.Now;
 
             var token = new JwtSecurityToken(
                 configuration["JWT:Issuer"],            //Issuer
                 configuration["JWT:Audience"],          //Audience
                 claims,                                 //Claims,
-                DateTime.Now,                           //notBefore
-                DateTime.Now.AddDays(2).AddHours(23),   //expires: 不大于微信session_key的3天有效期
+                now,                           //notBefore
+                now.AddDays(2).AddHours(23),   //expires: 不大于微信session_key的3天有效期
                 signingCredentials
             );
 

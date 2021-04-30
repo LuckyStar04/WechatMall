@@ -80,7 +80,13 @@ namespace WechatMall.Api.Controllers
             await userRepository.SaveAsync();
 
             var token = Jwt.GenerateJWT(configuration, user.UserID.ToString(), "User");
-            return Ok(token);
+            var jsonToReturn = JsonSerializer.Serialize(
+                new
+                {
+                    accessToken = token,
+                    userid = user.UserID
+                });
+            return Ok(jsonToReturn);
         }
 
         private Task<WxSession> GetSessionKey(string code)

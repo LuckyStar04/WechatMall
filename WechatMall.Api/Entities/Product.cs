@@ -18,6 +18,7 @@ namespace WechatMall.Api.Entities
         public string Name { get; set; }
         public List<ProductImage> Images { get; set; } = new List<ProductImage>();
         [Required, DefaultValue(0)]
+        [ConcurrencyCheck]
         public int StockCount { get; set; }
         [Required, DefaultValue(0)]
         public int SoldCount { get; set; }

@@ -8,13 +8,15 @@ using WechatMall.Api.Entities;
 
 namespace WechatMall.Api.Profiles
 {
-    public class UserProfile : Profile
+    public class CouponProfile : Profile
     {
-        public UserProfile()
+        public CouponProfile()
         {
-            CreateMap<User, UserDto>();
-            CreateMap<UserUpdateDto, User>();
+            CreateMap<Coupon, CouponDto>();
+            CreateMap<CouponAddDto, Coupon>();
+            CreateMap<CouponUpdateDto, Coupon>();
             CreateMap<Coupon_User, CouponUserDto>();
+            CreateMap<CouponUserUpdateDto, Coupon_User>();
         }
     }
 }

@@ -17,6 +17,11 @@ namespace WechatMall.Api.Services
             this.context = context;
         }
 
+        public IQueryable<Order> GetQueryableOrder()
+        {
+            return context.Orders;
+        }
+
         public async Task<Order> GetOrderByID(string orderID)
         {
             return await context.Orders.Include(o => o.OrderItems)

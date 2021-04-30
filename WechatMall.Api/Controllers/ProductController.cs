@@ -90,7 +90,7 @@ namespace WechatMall.Api.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("{productID}", Name = nameof(GetProduct))]
+        [HttpGet("{productID:length(10)}", Name = nameof(GetProduct))]
         public async Task<ActionResult<ProductDetailDto>> GetProduct(string productID)
         {
             var product = await productRepository.GetProductAsync(productID);
@@ -161,7 +161,7 @@ namespace WechatMall.Api.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpPut("{productID}")]
+        [HttpPut("{productID:length(10)}")]
         public async Task<IActionResult> UpdateProduct(string productID, ProductUpdateDto product)
         {
             var productEntity = await productRepository.GetProductAsync(productID);
@@ -177,7 +177,7 @@ namespace WechatMall.Api.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpPatch("{productID}")]
+        [HttpPatch("{productID:length(10)}")]
         public async Task<IActionResult> PartiallyUpdateProduct(string productID, JsonPatchDocument<ProductUpdateDto> patchDocument)
         {
             var productEntity = await productRepository.GetProductAsync(productID);

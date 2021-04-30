@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 using WechatMall.Api.Dtos;
 using WechatMall.Api.Entities;
@@ -32,7 +33,7 @@ namespace WechatMall.Api.Controllers
             this.cache = cache;
         }
 
-        [Authorize(Roles = "Admin,User")]
+        [Authorize(Roles = "Admin")]
         [HttpGet("{userid}", Name = nameof(GetUser))]
         public async Task<ActionResult<UserDto>> GetUser(Guid userid)
         {
@@ -77,7 +78,13 @@ namespace WechatMall.Api.Controllers
             userRepository.AddUser(newUser);
             await userRepository.SaveAsync();
             var token = Jwt.GenerateJWT(configuration, newUser.UserID.ToString(), "User");
-            return Ok(token);
+            var jsonToReturn = JsonSerializer.Serialize(
+                new
+                {
+                    accessToken = token,
+                    userid = newUser.UserID
+                });
+            return Ok(jsonToReturn);
         }
 
         [Authorize(Roles = "Admin,User")]
