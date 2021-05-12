@@ -60,6 +60,10 @@ namespace WechatMall.Api.Controllers
             {
                 queryable = queryable.Where(o => o.UserID.Equals(parameter.UserID));
             }
+            if (parameter.Status != null)
+            {
+                queryable = queryable.Where(o => o.Status.Equals(parameter.Status));
+            }
             queryable = queryable.OrderByDescending(o => o.OrderTime);
 
 
@@ -90,6 +94,27 @@ namespace WechatMall.Api.Controllers
             var orderDtos = mapper.Map<IEnumerable<OrderDto>>(pagedOrders);
 
             return Ok(orderDtos);
+        }
+
+        [Authorize(Roles = "User")]
+        [HttpGet("counts")]
+        public async Task<ActionResult<OrderCountDto>> GetOrderCounts()
+        {
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            Guid UserID = new(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            var queryable = orderRepository.GetQueryableOrder()
+                                           .Where(o => o.UserID.Equals(UserID) && !o.IsDeleted);
+
+            var status = Enum.GetValues<OrderStatus>();
+            int[] result = new int[status.Length];
+            foreach (var a in status)
+            {
+                result[(int)a] = await queryable.Where(o => o.Status.Equals(a)).CountAsync();
+            }
+
+            return Ok(new OrderCountDto { OrderCounts = result });
         }
 
         private string CreateProductsResourceUri(OrderDtoParameter parameters, ResourceUriType type)
@@ -129,7 +154,7 @@ namespace WechatMall.Api.Controllers
         [HttpGet("{orderID:length(16)}", Name = (nameof(GetOrder)))]
         public async Task<ActionResult<OrderDetailDto>> GetOrder(string orderID)
         {
-            Guid userID = new Guid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            Guid userID = new(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
             var order = await orderRepository.GetOrderByID(orderID);
             if (order == null || !order.UserID.Equals(userID))
@@ -145,7 +170,7 @@ namespace WechatMall.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> AddOrder([FromBody] OrderAddDto order)
         {
-            Guid userID = new Guid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            Guid userID = new(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
             var user = userRepository.GetUserAsync(userID);
             if (user == null)
@@ -178,12 +203,12 @@ namespace WechatMall.Api.Controllers
                 originalPrice += product.Price * addItem.Amount;
             }
 
-            Order orderEntity = new Order()
+            Order orderEntity = new()
             {
                 UserID = userID,
                 OrderID = orderID,
                 OrderItems = orderItems,
-                Status = "未付款",
+                Status = OrderStatus.待付款,
                 OrderTime = now,
                 ShippingAddrId = order.ShippingAddrId,
                 CouponAmount = CalcCoupon(),

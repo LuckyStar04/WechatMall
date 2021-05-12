@@ -26,9 +26,9 @@ namespace WechatMall.Api.Helpers
             var now = DateTime.Now;
 
             var token = new JwtSecurityToken(
-                configuration["JWT:Issuer"],            //Issuer
-                configuration["JWT:Audience"],          //Audience
-                claims,                                 //Claims,
+                configuration["JWT:Issuer"],   //Issuer
+                configuration["JWT:Audience"], //Audience
+                claims,                        //Claims,
                 now,                           //notBefore
                 now.AddDays(2).AddHours(23),   //expires: 不大于微信session_key的3天有效期
                 signingCredentials

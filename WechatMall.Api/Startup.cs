@@ -83,11 +83,13 @@ namespace WechatMall.Api
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<ICouponRepository, CouponRepository>();
+            services.AddScoped<IAddrRepository, AddrRepository>();
             services.AddDbContext<MallDbContext>(option =>
             {
                 option.UseMySql(Configuration.GetConnectionString("DefaultConnection"));
             });
             services.AddImageSharp();
+            services.AddHttpClient();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

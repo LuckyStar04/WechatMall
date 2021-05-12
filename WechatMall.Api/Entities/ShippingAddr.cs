@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace WechatMall.Api.Entities
 {
@@ -13,6 +11,10 @@ namespace WechatMall.Api.Entities
         [Required]
         public Guid UserID { get; set; }
         public User User { get; set; }
+        [Required, StringLength(20)]
+        public string Province { get; set; }
+        [Required, StringLength(20)]
+        public string City { get; set; }
         [Required, StringLength(255)]
         public string Address { get; set; }
         [Required, StringLength(50)]
@@ -23,6 +25,7 @@ namespace WechatMall.Api.Entities
         public string PostCode { get; set; }
         public int OrderById { get; set; }
         public bool IsDeleted { get; set; }
+        public bool IsDefault { get; set; }
         public List<Order> Orders { get; set; }
     }
 }

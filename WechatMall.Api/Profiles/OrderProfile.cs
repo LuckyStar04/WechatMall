@@ -16,6 +16,10 @@ namespace WechatMall.Api.Profiles
                 .ForMember(
                     dest => dest.ProductImage,
                     opt => opt.MapFrom(src => src.OrderItems.Count == 0 ? "" : src.OrderItems[0].Product.Images[0].ImagePath)
+                )
+                .ForMember(
+                    dest => dest.OrderItemsCount,
+                    opt => opt.MapFrom(src => src.OrderItems.Count)
                 );
             CreateMap<Order, OrderDetailDto>();
             CreateMap<OrderItem, OrderItemDto>()

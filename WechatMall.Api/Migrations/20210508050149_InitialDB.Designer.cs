@@ -9,7 +9,7 @@ using WechatMall.Api.Data;
 namespace WechatMall.Api.Migrations
 {
     [DbContext(typeof(MallDbContext))]
-    [Migration("20210426114840_InitialDB")]
+    [Migration("20210508050149_InitialDB")]
     partial class InitialDB
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -77,6 +77,7 @@ namespace WechatMall.Api.Migrations
                         .HasColumnType("DECIMAL(18,4)");
 
                     b.Property<int>("CouponCount")
+                        .IsConcurrencyToken()
                         .HasColumnType("int");
 
                     b.Property<string>("CouponName")
@@ -154,7 +155,7 @@ namespace WechatMall.Api.Migrations
                     b.Property<decimal>("OriginalPrice")
                         .HasColumnType("DECIMAL(18,4)");
 
-                    b.Property<decimal?>("PayAmount")
+                    b.Property<decimal?>("PaidPrice")
                         .HasColumnType("DECIMAL(18,4)");
 
                     b.Property<DateTime?>("PayTime")
@@ -166,10 +167,8 @@ namespace WechatMall.Api.Migrations
                     b.Property<decimal>("ShippingFare")
                         .HasColumnType("DECIMAL(18,4)");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("varchar(10) CHARACTER SET utf8mb4")
-                        .HasMaxLength(10);
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.Property<string>("TrackingNumber")
                         .HasColumnType("varchar(20) CHARACTER SET utf8mb4")
@@ -274,6 +273,7 @@ namespace WechatMall.Api.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("StockCount")
+                        .IsConcurrencyToken()
                         .HasColumnType("int");
 
                     b.HasKey("Id");

@@ -16,8 +16,8 @@ namespace WechatMall.Api.Entities
         public Guid UserID { get; set; }
         public User User { get; set; }
         public List<OrderItem> OrderItems { get; set; }
-        [Required, StringLength(10)]
-        public string Status { get; set; }
+        [Required]
+        public OrderStatus Status { get; set; }
         [Required]
         public DateTime OrderTime { get; set; }         //下单时间
         public DateTime? DeliverTime { get; set; }      //发货时间
@@ -32,12 +32,22 @@ namespace WechatMall.Api.Entities
         [Column(TypeName = "DECIMAL(18,4)")]
         public decimal OriginalPrice { get; set; }
         [Column(TypeName = "DECIMAL(18,4)")]
-        public decimal? PayAmount { get; set; }
+        public decimal? PaidPrice { get; set; }
         [Required]
         [Column(TypeName = "DECIMAL(18,4)")]
         public decimal ShippingFare { get; set; }
         public DateTime? PayTime { get; set; }
         [Required, DefaultValue(false)]
         public bool IsDeleted { get; set; }
+    }
+
+    public enum OrderStatus
+    {
+        待付款 = 0,
+        待发货 = 1,
+        待收货 = 2,
+        待评价 = 3,
+        退款中 = 4,
+        已完成 = 5
     }
 }

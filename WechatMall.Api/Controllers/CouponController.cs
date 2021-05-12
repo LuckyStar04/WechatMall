@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using WechatMall.Api.DtoParameters;
 using WechatMall.Api.Dtos;
@@ -59,6 +60,24 @@ namespace WechatMall.Api.Controllers
             var dtoToReturn = mapper.Map<IEnumerable<CouponDto>>(await coupons.ToListAsync());
             return Ok(dtoToReturn);
         }
+
+        [Authorize(Roles = "User")]
+        [HttpGet("counts")]
+        public async Task<ActionResult<CouponCountDto>> GetCouponCounts()
+        {
+            var now = DateTime.Now;
+            Guid UserID = new(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            IQueryable<Coupon> coupons = couponRepository.GetIQueryableCoupon();
+            IQueryable<Coupon_User> couponUser = couponRepository.GetIQueryableCouponUser()
+                                                                 .Include(c => c.Coupon);
+
+            var result = new int[2];
+            result[0] = await coupons.Where(c => c.StartTime <= now && c.EndTime >= now && !c.IsDeleted).CountAsync();
+            result[1] = await couponUser.Where(c => c.UserID.Equals(UserID) && c.Coupon.StartTime <= now && c.Coupon.EndTime >= now && !c.Coupon.IsDeleted).SumAsync(c => c.RemainedCount);
+            return Ok(new CouponCountDto { CouponCounts = result });
+        }
+
 
         [Authorize(Roles = "Admin")]
         [HttpGet("{couponID}", Name = nameof(GetCoupon))]

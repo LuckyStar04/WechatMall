@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
@@ -141,7 +140,7 @@ namespace WechatMall.Api.Controllers
         {
             if (!await categoryRepository.CategoryExistsAsync(product.CategoryID))
             {
-                return NotFound();
+                return NotFound("Category not found!");
             }
 
             if (await productRepository.ProductExistsAsync(product.ProductID))

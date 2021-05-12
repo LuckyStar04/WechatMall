@@ -2,13 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.IO;
 using System.Net;
-using System.Security.Claims;
-using System.Text;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using WechatMall.Api.Dtos;
@@ -23,16 +19,19 @@ namespace WechatMall.Api.Controllers
     {
         private readonly IConfiguration configuration;
         private readonly IUserRepository userRepository;
+        private readonly IHttpClientFactory clientFactory;
         private readonly IMemoryCache cache;
 
         private static TimeSpan CacheExpireSpan = new TimeSpan(1, 0, 0, 0);
 
         public AccountController(IConfiguration configuration,
                                  IUserRepository userRepository,
+                                 IHttpClientFactory clientFactory,
                                  IMemoryCache cache)
         {
             this.configuration = configuration;
             this.userRepository = userRepository;
+            this.clientFactory = clientFactory;
             this.cache = cache;
         }
 
@@ -89,30 +88,29 @@ namespace WechatMall.Api.Controllers
             return Ok(jsonToReturn);
         }
 
-        private Task<WxSession> GetSessionKey(string code)
+        private async Task<WxSession> GetSessionKey(string code)
         {
-            return Task.Run(() =>
+            var appid = configuration["MiniApp:AppID"];
+            var secret = configuration["MiniApp:AppSecret"];
+            var url = configuration["MiniApp:AuthUrl"];
+
+            url = string.Format(url, appid, secret, code.Trim());
+
+            var request = new HttpRequestMessage(HttpMethod.Get, url);
+
+            var client = clientFactory.CreateClient();
+
+            var response = await client.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
             {
-                var appid = configuration["MiniApp:AppID"];
-                var secret = configuration["MiniApp:AppSecret"];
-                var url = configuration["MiniApp:AuthUrl"];
-
-                url = string.Format(url, appid, secret, code.Trim());
-
-                var request = WebRequest.Create(url);
-                request.Method = "GET";
-                request.ContentType = "text/html;charset=UTF-8";
-
-                string result;
-
-                using (var response = request.GetResponse())
-                using (var stream = response.GetResponseStream())
-                using (var reader = new StreamReader(stream, Encoding.GetEncoding("utf-8")))
-                {
-                    result = reader.ReadToEnd();
-                }
-                return JsonSerializer.Deserialize<WxSession>(result);
-            });
+                using var responseStream = await response.Content.ReadAsStreamAsync();
+                return await JsonSerializer.DeserializeAsync<WxSession>(responseStream);
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 

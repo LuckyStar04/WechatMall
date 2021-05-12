@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WechatMall.Api.Entities;
 
 namespace WechatMall.Api.DtoParameters
 {
@@ -10,6 +11,7 @@ namespace WechatMall.Api.DtoParameters
         private const int MinPageSize = 5;
         private const int MaxPageSize = 20;
         public Guid? UserID { get; set; }
+        public OrderStatus? Status { get; set; }
         public int PageNumber
         {
             get => _PageNumber;

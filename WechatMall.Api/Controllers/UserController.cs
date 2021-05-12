@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Security.Claims;
 using System.Text.Json;
 using System.Threading.Tasks;
 using WechatMall.Api.Dtos;
@@ -33,10 +34,20 @@ namespace WechatMall.Api.Controllers
             this.cache = cache;
         }
 
-        [Authorize(Roles = "Admin")]
-        [HttpGet("{userid}", Name = nameof(GetUser))]
+        [Authorize(Roles = "Admin,User")]
+        [HttpGet("{userid:guid}", Name = nameof(GetUser))]
         public async Task<ActionResult<UserDto>> GetUser(Guid userid)
         {
+            string role = User.FindFirst(ClaimTypes.Role)?.Value;
+            if (role.Equals("User"))
+            {
+                Guid userID = new Guid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                if (!userID.Equals(userid))
+                {
+                    return Unauthorized();
+                }
+            }
+
             var userEntity = await userRepository.GetUserAsync(userid);
             if (userEntity == null)
             {
@@ -88,9 +99,19 @@ namespace WechatMall.Api.Controllers
         }
 
         [Authorize(Roles = "Admin,User")]
-        [HttpPut("{userid}")]
+        [HttpPut("{userid:guid}")]
         public async Task<IActionResult> UpdateUser(Guid userid, UserUpdateDto user)
         {
+            string role = User.FindFirst(ClaimTypes.Role)?.Value;
+            if (role.Equals("User"))
+            {
+                Guid userID = new Guid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                if (!userID.Equals(userid))
+                {
+                    return Unauthorized();
+                }
+            }
+
             var userEntity = await userRepository.GetUserAsync(userid);
             if (userEntity == null)
             {
