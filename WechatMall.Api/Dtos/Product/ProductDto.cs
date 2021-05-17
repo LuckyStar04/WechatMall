@@ -8,6 +8,7 @@
         public int StockCount { get; set; }
         public int SoldCount { get; set; }
         public decimal Price { get; set; }
+        public int ShippingFareID { get; set; }
         public int OrderbyId { get; set; }
     }
 }

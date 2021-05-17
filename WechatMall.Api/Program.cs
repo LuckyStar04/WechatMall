@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace WechatMall.Api
 {
+#pragma warning disable CS1591
     public class Program
     {
         public static void Main(string[] args)
@@ -25,4 +26,5 @@ namespace WechatMall.Api
 
                 });
     }
+#pragma warning restore CS1591
 }

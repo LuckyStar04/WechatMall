@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace WechatMall.Api.Dtos
 {
-    public class OrderPatchDto
+    public class FareUpdateDto
     {
     }
 }

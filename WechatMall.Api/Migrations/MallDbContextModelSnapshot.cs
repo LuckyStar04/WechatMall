@@ -333,6 +333,25 @@ namespace WechatMall.Api.Migrations
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
                         .HasMaxLength(255);
 
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("varchar(20) CHARACTER SET utf8mb4")
+                        .HasMaxLength(20);
+
+                    b.Property<int>("CityID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("County")
+                        .IsRequired()
+                        .HasColumnType("varchar(20) CHARACTER SET utf8mb4")
+                        .HasMaxLength(20);
+
+                    b.Property<int>("CountyID")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
 
@@ -348,6 +367,14 @@ namespace WechatMall.Api.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(6) CHARACTER SET utf8mb4")
                         .HasMaxLength(6);
+
+                    b.Property<string>("Province")
+                        .IsRequired()
+                        .HasColumnType("varchar(20) CHARACTER SET utf8mb4")
+                        .HasMaxLength(20);
+
+                    b.Property<int>("ProvinceID")
+                        .HasColumnType("int");
 
                     b.Property<string>("ReceiverName")
                         .IsRequired()

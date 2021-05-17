@@ -12,6 +12,8 @@ using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
 using SixLabors.ImageSharp.Web.DependencyInjection;
 using System;
+using System.IO;
+using System.Reflection;
 using System.Text;
 using WechatMall.Api.Data;
 using WechatMall.Api.Services;
@@ -73,6 +75,10 @@ namespace WechatMall.Api
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Wechat Mall API", Version = "v1" });
+
+                //var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                //var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                //c.IncludeXmlComments(xmlPath, true);
             });
             services.AddMemoryCache();
 

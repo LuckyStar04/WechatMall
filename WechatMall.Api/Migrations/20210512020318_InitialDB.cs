@@ -174,12 +174,19 @@ namespace WechatMall.Api.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     UserID = table.Column<Guid>(nullable: false),
+                    Province = table.Column<string>(maxLength: 20, nullable: false),
+                    ProvinceID = table.Column<int>(nullable: false),
+                    City = table.Column<string>(maxLength: 20, nullable: false),
+                    CityID = table.Column<int>(nullable: false),
+                    County = table.Column<string>(maxLength: 20, nullable: false),
+                    CountyID = table.Column<int>(nullable: false),
                     Address = table.Column<string>(maxLength: 255, nullable: false),
                     ReceiverName = table.Column<string>(maxLength: 50, nullable: false),
                     PhoneNumber = table.Column<string>(maxLength: 50, nullable: false),
                     PostCode = table.Column<string>(maxLength: 6, nullable: false),
                     OrderById = table.Column<int>(nullable: false),
-                    IsDeleted = table.Column<bool>(nullable: false)
+                    IsDeleted = table.Column<bool>(nullable: false),
+                    IsDefault = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {

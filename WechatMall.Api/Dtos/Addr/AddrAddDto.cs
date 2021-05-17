@@ -8,8 +8,17 @@ namespace WechatMall.Api.Dtos
         [MaxLength(20, ErrorMessage = "{0} 的最大长度为 {1}。")]
         public string Province { get; set; }
         [Required(ErrorMessage = "{0} 字段是必填的")]
+        public int ProvinceID { get; set; }
+        [Required(ErrorMessage = "{0} 字段是必填的")]
         [MaxLength(20, ErrorMessage = "{0} 的最大长度为 {1}。")]
         public string City { get; set; }
+        [Required(ErrorMessage = "{0} 字段是必填的")]
+        public int CityID { get; set; }
+        [Required(ErrorMessage = "{0} 字段是必填的")]
+        [MaxLength(20, ErrorMessage = "{0} 的最大长度为 {1}。")]
+        public string County { get; set; }
+        [Required(ErrorMessage = "{0} 字段是必填的")]
+        public int CountyID { get; set; }
         [Required(ErrorMessage = "{0} 字段是必填的")]
         [MaxLength(255, ErrorMessage = "{0} 的最大长度为 {1}。")]
         public string Address { get; set; }

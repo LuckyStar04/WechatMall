@@ -100,8 +100,6 @@ namespace WechatMall.Api.Controllers
         [HttpGet("counts")]
         public async Task<ActionResult<OrderCountDto>> GetOrderCounts()
         {
-            var role = User.FindFirst(ClaimTypes.Role)?.Value;
-
             Guid UserID = new(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
             var queryable = orderRepository.GetQueryableOrder()
@@ -154,12 +152,18 @@ namespace WechatMall.Api.Controllers
         [HttpGet("{orderID:length(16)}", Name = (nameof(GetOrder)))]
         public async Task<ActionResult<OrderDetailDto>> GetOrder(string orderID)
         {
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
             Guid userID = new(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
             var order = await orderRepository.GetOrderByID(orderID);
-            if (order == null || !order.UserID.Equals(userID))
+            if (order == null)
             {
                 return NotFound();
+            }
+
+            if (role != "Admin" && !order.UserID.Equals(userID))
+            {
+                return Unauthorized();
             }
 
             var orderDto = mapper.Map<OrderDetailDto>(order);
@@ -235,12 +239,17 @@ namespace WechatMall.Api.Controllers
         [HttpPut("{orderID:length(16)}")]
         public async Task<IActionResult> UpdateOrder(string orderID, [FromBody] OrderUpdateDto order)
         {
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
             Guid userID = new Guid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
             var orderEntity = await orderRepository.GetOrderByID(orderID);
-            if (orderEntity == null || !orderEntity.UserID.Equals(userID))
+            if (orderEntity == null)
             {
                 return NotFound();
+            }
+            if (!role.Equals("Admin") && !orderEntity.UserID.Equals(userID))
+            {
+                return Unauthorized();
             }
 
             mapper.Map(order, orderEntity);
@@ -251,29 +260,54 @@ namespace WechatMall.Api.Controllers
 
         [Authorize(Roles = "Admin,User")]
         [HttpPatch("{orderID:length(16)}")]
-        public async Task<IActionResult> PartiallyUpdateOrder(string orderID, [FromBody] OrderPatchDto order)
+        public async Task<IActionResult> PartiallyUpdateOrder(string orderID, [FromBody] JsonPatchDocument<OrderUpdateDto> patchDocument)
         {
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
             Guid userID = new Guid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-            throw new NotImplementedException();
-
-        }
-
-        [Authorize(Roles = "Admin,User")]
-        [HttpDelete("{orderID:length(16)}")]
-        public async Task<IActionResult> RemoveOrder(string orderID)
-        {
-            Guid userID = new Guid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-
-            var order = await orderRepository.GetOrderByID(orderID);
-            if (order == null || !order.UserID.Equals(userID))
+            var orderEntity = await orderRepository.GetOrderByID(orderID);
+            if (orderEntity == null)
             {
                 return NotFound();
             }
+            if (!role.Equals("Admin") && !orderEntity.UserID.Equals(userID))
+            {
+                return Unauthorized();
+            }
 
-            orderRepository.RemoveOrder(order);
+            var dtoToPatch = mapper.Map<OrderUpdateDto>(orderEntity);
+            patchDocument.ApplyTo(dtoToPatch, ModelState);
+            if (!TryValidateModel(dtoToPatch))
+            {
+                return ValidationProblem(ModelState);
+            }
+
+            mapper.Map(dtoToPatch, orderEntity);
+            orderRepository.UpdateOrder(orderEntity);
             await orderRepository.SaveAsync();
             return NoContent();
         }
+
+        //[Authorize(Roles = "Admin,User")]
+        //[HttpDelete("{orderID:length(16)}")]
+        //public async Task<IActionResult> RemoveOrder(string orderID)
+        //{
+        //    var role = User.FindFirst(ClaimTypes.Role)?.Value;
+        //    Guid userID = new Guid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+        //    var order = await orderRepository.GetOrderByID(orderID);
+        //    if (order == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    if (!role.Equals("Admin") && !order.UserID.Equals(userID))
+        //    {
+        //        return Unauthorized();
+        //    }
+
+        //    orderRepository.RemoveOrder(order);
+        //    await orderRepository.SaveAsync();
+        //    return NoContent();
+        //}
     }
 }

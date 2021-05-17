@@ -26,10 +26,18 @@ namespace WechatMall.Api.Services
 
         public async Task<ShippingAddr> GetDefaultAddr(Guid userid)
         {
-            return await context.ShippingAddrs.Where(a => a.UserID.Equals(userid)
-                                                       && a.IsDefault
-                                                       && !a.IsDeleted)
-                                              .FirstOrDefaultAsync();
+            var addr = await context.ShippingAddrs.Where(a => a.UserID.Equals(userid)
+                                                           && a.IsDefault
+                                                           && !a.IsDeleted)
+                                                  .FirstOrDefaultAsync();
+            if (addr == null)
+            {
+                addr = await context.ShippingAddrs.Where(a => a.UserID.Equals(userid)
+                                                           && !a.IsDeleted)
+                                                  .OrderBy(a => a.OrderById)
+                                                  .FirstOrDefaultAsync();
+            }
+            return addr;
         }
 
         public async Task<ShippingAddr> GetAddr(int addrId)
@@ -41,11 +49,18 @@ namespace WechatMall.Api.Services
         {
             if (addr == null) throw new ArgumentNullException(nameof(addr));
             addr.UserID = userid;
+            if (addr.IsDefault)
+            {
+                context.Database.ExecuteSqlRaw($"UPDATE `ShippingAddrs` SET IsDefault=0 WHERE UserID='{userid}';");
+            }
             context.ShippingAddrs.Add(addr);
         }
         public void UpdateAddr(ShippingAddr addr)
         {
-            //no need code
+            if (addr.IsDefault)
+            {
+                context.Database.ExecuteSqlRaw($"UPDATE `ShippingAddrs` SET IsDefault=0 WHERE UserID='{addr.UserID}';");
+            }
         }
         public void DeleteAddr(ShippingAddr addr)
         {

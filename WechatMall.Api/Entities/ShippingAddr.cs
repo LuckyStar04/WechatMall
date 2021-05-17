@@ -13,8 +13,16 @@ namespace WechatMall.Api.Entities
         public User User { get; set; }
         [Required, StringLength(20)]
         public string Province { get; set; }
+        [Required]
+        public int ProvinceID { get; set; }
         [Required, StringLength(20)]
         public string City { get; set; }
+        [Required]
+        public int CityID { get; set; }
+        [Required, StringLength(20)]
+        public string County { get; set; }
+        [Required]
+        public int CountyID { get; set; }
         [Required, StringLength(255)]
         public string Address { get; set; }
         [Required, StringLength(50)]

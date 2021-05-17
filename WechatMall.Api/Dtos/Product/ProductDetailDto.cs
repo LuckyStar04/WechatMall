@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using WechatMall.Api.Entities;
 
 namespace WechatMall.Api.Dtos
 {
@@ -10,6 +11,7 @@ namespace WechatMall.Api.Dtos
         public int StockCount { get; set; }
         public int SoldCount { get; set; }
         public decimal Price { get; set; }
+        public int ShippingFareID { get; set; }
         public string Detail { get; set; }
         public int OrderbyId { get; set; }
     }

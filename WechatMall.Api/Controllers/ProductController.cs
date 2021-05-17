@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -19,6 +20,9 @@ using WechatMall.Api.Services;
 
 namespace WechatMall.Api.Controllers
 {
+    /// <summary>
+    /// 商品的增删改查。
+    /// </summary>
     [ApiController]
     [Route("api/products")]
     public class ProductController : ControllerBase
@@ -27,6 +31,7 @@ namespace WechatMall.Api.Controllers
         private readonly ICategoryRepository categoryRepository;
         private readonly IMapper mapper;
 
+#pragma warning disable CS1591
         public ProductController(IProductRepository productRepository,
                                  ICategoryRepository categoryRepository,
                                  IMapper mapper)
@@ -35,7 +40,14 @@ namespace WechatMall.Api.Controllers
             this.categoryRepository = categoryRepository;
             this.mapper = mapper;
         }
+#pragma warning restore CS1591
 
+        /// <summary>
+        /// 查询多条商品信息。
+        /// </summary>
+        /// <param name="parameter">传入CategoryID、排序、分页等参数</param>
+        /// <returns>多条商品信息</returns>
+        [Produces("application/json")]
         [AllowAnonymous]
         [HttpGet(Name = nameof(GetProducts))]
         public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts([FromQuery] ProductDtoParameter parameter)
@@ -88,6 +100,12 @@ namespace WechatMall.Api.Controllers
             return Ok(productDtos);
         }
 
+        /// <summary>
+        /// 查询单条商品信息。
+        /// </summary>
+        /// <param name="productID">商品ID，应为10位数字的字符串</param>
+        /// <returns>商品详情信息</returns>
+        [Produces("application/json")]
         [AllowAnonymous]
         [HttpGet("{productID:length(10)}", Name = nameof(GetProduct))]
         public async Task<ActionResult<ProductDetailDto>> GetProduct(string productID)
@@ -128,12 +146,22 @@ namespace WechatMall.Api.Controllers
                     });
             }
         }
-        public enum ResourceUriType
+
+        private enum ResourceUriType
         {
             PreviousPage,
             NextPage
         }
 
+        /// <summary>
+        /// 添加商品信息。
+        /// </summary>
+        /// <param name="product">要添加的商品信息</param>
+        /// <returns>新创建的商品信息</returns>
+        /// <response code="201">返回新创建的商品信息</response>
+        /// <response code="404">当商品的分类ID所对应分类未找到时</response>
+        /// <response code="409">当商品ID冲突重复时</response>
+        /// <response code="422">当输入json参数未能成功绑定时</response>
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<ProductDetailDto>> AddProduct(ProductAddDto product)
@@ -159,6 +187,12 @@ namespace WechatMall.Api.Controllers
             dtoToReturn);
         }
 
+        /// <summary>
+        /// 整体更新商品信息。
+        /// </summary>
+        /// <param name="productID">要更新的商品ID</param>
+        /// <param name="product">要更新的商品信息</param>
+        /// <returns></returns>
         [Authorize(Roles = "Admin")]
         [HttpPut("{productID:length(10)}")]
         public async Task<IActionResult> UpdateProduct(string productID, ProductUpdateDto product)
@@ -175,6 +209,12 @@ namespace WechatMall.Api.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// 部分更新单条商品信息。
+        /// </summary>
+        /// <param name="productID">商品ID，应为10位数字的字符串</param>
+        /// <param name="patchDocument"></param>
+        /// <returns>商品详情信息</returns>
         [Authorize(Roles = "Admin")]
         [HttpPatch("{productID:length(10)}")]
         public async Task<IActionResult> PartiallyUpdateProduct(string productID, JsonPatchDocument<ProductUpdateDto> patchDocument)

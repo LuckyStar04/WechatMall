@@ -1,0 +1,137 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>WechatMall.Api</name>
+    </assembly>
+    <members>
+        <member name="T:WechatMall.Api.Controllers.ProductController">
+            <summary>
+            商品的增删改查。
+            </summary>
+        </member>
+        <member name="M:WechatMall.Api.Controllers.ProductController.GetProducts(WechatMall.Api.DtoParameters.ProductDtoParameter)">
+            <summary>
+            查询多条商品信息。
+            </summary>
+            <param name="parameter">传入CategoryID、排序、分页等参数</param>
+            <returns>多条商品信息</returns>
+        </member>
+        <member name="M:WechatMall.Api.Controllers.ProductController.GetProduct(System.String)">
+            <summary>
+            查询单条商品信息。
+            </summary>
+            <param name="productID">商品ID，应为10位数字的字符串</param>
+            <returns>商品详情信息</returns>
+        </member>
+        <member name="M:WechatMall.Api.Controllers.ProductController.AddProduct(WechatMall.Api.Dtos.ProductAddDto)">
+            <summary>
+            添加商品信息。
+            </summary>
+            <param name="product">要添加的商品信息</param>
+            <returns>新创建的商品信息</returns>
+            <response code="201">返回新创建的商品信息</response>
+            <response code="404">当商品的分类ID所对应分类未找到时</response>
+            <response code="409">当商品ID冲突重复时</response>
+            <response code="422">当输入json参数未能成功绑定时</response>
+        </member>
+        <member name="M:WechatMall.Api.Controllers.ProductController.UpdateProduct(System.String,WechatMall.Api.Dtos.ProductUpdateDto)">
+            <summary>
+            整体更新商品信息。
+            </summary>
+            <param name="productID">要更新的商品ID</param>
+            <param name="product">要更新的商品信息</param>
+            <returns></returns>
+        </member>
+        <member name="M:WechatMall.Api.Controllers.ProductController.PartiallyUpdateProduct(System.String,Microsoft.AspNetCore.JsonPatch.JsonPatchDocument{WechatMall.Api.Dtos.ProductUpdateDto})">
+            <summary>
+            部分更新单条商品信息。
+            </summary>
+            <param name="productID">商品ID，应为10位数字的字符串</param>
+            <param name="patchDocument"></param>
+            <returns>商品详情信息</returns>
+        </member>
+        <member name="T:WechatMall.Api.DtoParameters.ProductDtoParameter">
+            <summary>
+            商品查询的总参数
+            </summary>
+        </member>
+        <member name="P:WechatMall.Api.DtoParameters.ProductDtoParameter.CategoryID">
+            <summary>
+            商品的分类ID
+            </summary>
+        </member>
+        <member name="P:WechatMall.Api.DtoParameters.ProductDtoParameter.OrderBy">
+            <summary>
+            商品的排序参数
+            </summary>
+        </member>
+        <member name="P:WechatMall.Api.DtoParameters.ProductDtoParameter.PageNumber">
+            <summary>
+            要查看的具体页数
+            </summary>
+        </member>
+        <member name="P:WechatMall.Api.DtoParameters.ProductDtoParameter.PageSize">
+            <summary>
+            要查看的分页大小
+            </summary>
+        </member>
+        <member name="T:WechatMall.Api.DtoParameters.OrderType">
+            <summary>
+            商品的排序参数enum
+            </summary>
+        </member>
+        <member name="F:WechatMall.Api.DtoParameters.OrderType.None">
+            <summary>
+            无需排序
+            </summary>
+        </member>
+        <member name="F:WechatMall.Api.DtoParameters.OrderType.Recommend">
+            <summary>
+            按系统推荐度排序
+            </summary>
+        </member>
+        <member name="F:WechatMall.Api.DtoParameters.OrderType.TopSales">
+            <summary>
+            按销量从高到低排序
+            </summary>
+        </member>
+        <member name="M:WechatMall.Api.Helpers.WXEncrypt.DescodeWxSHA1(System.String,System.String,System.String)">
+            <summary>
+            解密小程序的encryptedData
+            </summary>
+            <param name="encryptedData">加密的信息</param>
+            <param name="sessionKey">key</param>
+            <param name="iv">加密算法的初始向量</param>
+        </member>
+        <member name="P:WechatMall.Api.Helpers.WxPhoneModel.PhoneNumber">
+            <summary>
+            用户绑定的手机号（国外手机号会有区号）
+            </summary>
+        </member>
+        <member name="P:WechatMall.Api.Helpers.WxPhoneModel.PurePhoneNumber">
+            <summary>
+            没有区号的手机号
+            </summary>
+        </member>
+        <member name="P:WechatMall.Api.Helpers.WxPhoneModel.CountryCode">
+            <summary>
+            区号
+            </summary>
+        </member>
+        <member name="P:WechatMall.Api.Helpers.WxPhoneModel.WaterMark">
+            <summary>
+            水印
+            </summary>
+        </member>
+        <member name="P:WechatMall.Api.Helpers.WaterMarkModel.AppId">
+            <summary>
+            appid
+            </summary>
+        </member>
+        <member name="P:WechatMall.Api.Helpers.WaterMarkModel.TimeStamp">
+            <summary>
+            时间戳
+            </summary>
+        </member>
+    </members>
+</doc>
