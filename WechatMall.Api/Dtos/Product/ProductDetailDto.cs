@@ -11,6 +11,7 @@ namespace WechatMall.Api.Dtos
         public int StockCount { get; set; }
         public int SoldCount { get; set; }
         public decimal Price { get; set; }
+        public string ShippingAddress { get; set; }
         public int ShippingFareID { get; set; }
         public string Detail { get; set; }
         public int OrderbyId { get; set; }

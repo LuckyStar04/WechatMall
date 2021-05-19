@@ -76,9 +76,9 @@ namespace WechatMall.Api
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Wechat Mall API", Version = "v1" });
 
-                //var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                //var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                //c.IncludeXmlComments(xmlPath, true);
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath, true);
             });
             services.AddMemoryCache();
 

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using WechatMall.Api.DtoParameters;
@@ -37,7 +38,14 @@ namespace WechatMall.Api.Controllers
             if (parameter.IsDefault)
             {
                 var addr = await addrRepository.GetDefaultAddr(userID);
-                dtoToReturn = new List<AddrDto> { mapper.Map<AddrDto>(addr) };
+                if (addr != null)
+                {
+                    dtoToReturn = new List<AddrDto> { mapper.Map<AddrDto>(addr) };
+                }
+                else
+                {
+                    dtoToReturn = Enumerable.Empty<AddrDto>();
+                }
             }
             else
             {
