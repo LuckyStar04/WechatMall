@@ -90,6 +90,7 @@ namespace WechatMall.Api
             services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<ICouponRepository, CouponRepository>();
             services.AddScoped<IAddrRepository, AddrRepository>();
+            services.AddScoped<IFareRepository, FareRepository>();
             services.AddDbContext<MallDbContext>(option =>
             {
                 option.UseMySql(Configuration.GetConnectionString("DefaultConnection"));
